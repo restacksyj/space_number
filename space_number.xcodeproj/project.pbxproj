@@ -10,9 +10,22 @@
 		7F47363B2CE71EBE0019E11D /* space_number.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = space_number.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		7F4736542CE725C40019E11D /* Exceptions for "space_number" folder in "Copy Bundle Resources" phase from "space_number" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 7F4736392CE71EBE0019E11D /* Resources */;
+			membershipExceptions = (
+				SpaceNumber.h,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7F47363D2CE71EBE0019E11D /* space_number */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7F4736542CE725C40019E11D /* Exceptions for "space_number" folder in "Copy Bundle Resources" phase from "space_number" target */,
+			);
 			path = space_number;
 			sourceTree = "<group>";
 		};
@@ -264,6 +277,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.restacksy.space-number.space-number";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = space_number/SpaceNumber.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -289,6 +303,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.restacksy.space-number.space-number";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = space_number/SpaceNumber.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
