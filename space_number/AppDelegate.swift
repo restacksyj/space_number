@@ -11,6 +11,7 @@ import Foundation
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     fileprivate var statusBarItem: NSStatusItem?
+    private var statusBarMenu: NSMenu!
     @IBOutlet weak var window: NSWindow!
     @IBOutlet weak var statusMenu: NSMenu!
     @IBOutlet weak var application: NSApplication!
@@ -22,11 +23,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var currentSpaceNumber: Int = -1
     
     func applicationWillFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
         configureObservers()
         configureSpaceMonitor()
         updateActiveSpaceNumber()
     }
     
+    @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
+        // This method will be called when the status bar item is clicked
+        statusBarItem?.menu?.popUp(positioning: nil,
+                                   at: NSPoint(x: sender.bounds.midX,
+                                               y: sender.bounds.minY),
+                                   in: sender)
+    }
     
     @objc func showFloatingWindow(value: String) {
         if let existingWindow = floatingWindow {
@@ -55,7 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         floatingWindow = window
         window.orderFront(nil)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             self?.floatingWindow?.orderOut(nil)
             self?.floatingWindow = nil
         }
@@ -164,6 +173,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.target = self
             button.title = "?"
         }
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        let menu = NSMenu()
+        let quitItem = NSMenuItem()
+        quitItem.title = "Quit"
+        quitItem.target = NSApplication.shared
+        quitItem.action = #selector(NSApplication.terminate(_:))
+        quitItem.keyEquivalent = "q"
+        menu.addItem(quitItem)
+        if let button = statusBarItem?.button {
+            button.title = "?"
+        }
+        statusBarItem?.menu = menu
     }
     
 }
