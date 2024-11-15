@@ -18,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let mainDisplay = "Main"
     let spacesMonitorFile = "~/Library/Preferences/com.apple.spaces.plist"
     let conn = _CGSDefaultConnection()
-    private var floatingWindow: NSWindow? // Keep refer
+    private var floatingWindow: NSWindow?
     private var currentSpaceNumber: Int = -1
     
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -27,42 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateActiveSpaceNumber()
     }
     
-    //    @objc func showFloatingWindow(value:String) {
-    //        if floatingWindow != nil {
-    //                    return // Skip creating a new window if it already exists
-    //                }
-    //        floatingWindow = NSWindow(
-    //            contentRect: NSRect(x: 0, y: 0, width: 150, height: 100),
-    //            styleMask: [.borderless],
-    //            backing: .buffered,
-    //            defer: false
-    //        )
-    //
-    //        floatingWindow?.isReleasedWhenClosed = true
-    //        floatingWindow?.isOpaque = false
-    //        var body: some View {
-    //            Text(value)
-    //                .foregroundColor(.white)
-    //                .font(.system(size: 30))
-    //                .frame(maxWidth: .infinity, maxHeight: .infinity)
-    //                .background(Color.black)
-    //                .cornerRadius(10)
-    //                .padding()
-    //                .multilineTextAlignment(.center)
-    //        }
-    //        floatingWindow?.contentView = NSHostingView(rootView: body)
-    //        floatingWindow?.backgroundColor = NSColor.black
-    //        floatingWindow?.level = .floating
-    //        floatingWindow?.alphaValue = 0.8
-    //        floatingWindow?.center()
-    //        floatingWindow?.makeKeyAndOrderFront(nil)
-    //
-    //        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-    //            self.floatingWindow?.close()
-    //            self.floatingWindow = nil // Release the reference after closing
-    //        }
-    //
-    //    }
     
     @objc func showFloatingWindow(value: String) {
         if let existingWindow = floatingWindow {
@@ -79,8 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.isOpaque = false
         window.level = .floating
         window.collectionBehavior = [.transient, .ignoresCycle]
-        let contentView = NSHostingView(rootView:
-                                            Text(value)
+        let contentView = NSHostingView(rootView: Text(value)
             .foregroundColor(.white)
             .font(.system(size: 30, weight: .bold))
             .frame(width: 100, height: 60)
@@ -193,12 +156,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSWorkspace.activeSpaceDidChangeNotification,
             object: workspace
         )
-//        NotificationCenter.default.addObserver(
-//            self,
-//            selector: #selector(AppDelegate.updateActiveSpaceNumber),
-//            name: NSApplication.didUpdateNotification,
-//            object: nil
-//        )
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
