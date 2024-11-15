@@ -9,31 +9,6 @@ import SwiftUI
 
 import Foundation
 
-class FloatingTextView: NSView {
-    private var textField: NSTextField!
-
-    init(frame: NSRect, value: String) {
-        super.init(frame: frame)
-        textField = NSTextField(labelWithString: value)
-        textField.font = NSFont.systemFont(ofSize: 30)
-        textField.textColor = .white
-        textField.alignment = .center
-        textField.frame = self.bounds
-        addSubview(textField)
-        wantsLayer = true
-        layer?.backgroundColor = NSColor.black.withAlphaComponent(0.8).cgColor
-        layer?.cornerRadius = 10
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    func updateText(value: String) {
-        textField.stringValue = value
-    }
-}
-
 class AppDelegate: NSObject, NSApplicationDelegate {
     fileprivate var statusBarItem: NSStatusItem?
     @IBOutlet weak var window: NSWindow!
@@ -43,7 +18,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let mainDisplay = "Main"
     let spacesMonitorFile = "~/Library/Preferences/com.apple.spaces.plist"
     let conn = _CGSDefaultConnection()
-    var floatingWindow: NSWindow? // Keep refer
+    private var floatingWindow: NSWindow? // Keep refer
+    private var currentSpaceNumber: Int = -1
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         configureObservers()
@@ -51,41 +27,75 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateActiveSpaceNumber()
     }
     
-    @objc func showFloatingWindow(value:String) {
-        if floatingWindow != nil {
-                    return // Skip creating a new window if it already exists
-                }
-        floatingWindow = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 150, height: 100),
+    //    @objc func showFloatingWindow(value:String) {
+    //        if floatingWindow != nil {
+    //                    return // Skip creating a new window if it already exists
+    //                }
+    //        floatingWindow = NSWindow(
+    //            contentRect: NSRect(x: 0, y: 0, width: 150, height: 100),
+    //            styleMask: [.borderless],
+    //            backing: .buffered,
+    //            defer: false
+    //        )
+    //
+    //        floatingWindow?.isReleasedWhenClosed = true
+    //        floatingWindow?.isOpaque = false
+    //        var body: some View {
+    //            Text(value)
+    //                .foregroundColor(.white)
+    //                .font(.system(size: 30))
+    //                .frame(maxWidth: .infinity, maxHeight: .infinity)
+    //                .background(Color.black)
+    //                .cornerRadius(10)
+    //                .padding()
+    //                .multilineTextAlignment(.center)
+    //        }
+    //        floatingWindow?.contentView = NSHostingView(rootView: body)
+    //        floatingWindow?.backgroundColor = NSColor.black
+    //        floatingWindow?.level = .floating
+    //        floatingWindow?.alphaValue = 0.8
+    //        floatingWindow?.center()
+    //        floatingWindow?.makeKeyAndOrderFront(nil)
+    //
+    //        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+    //            self.floatingWindow?.close()
+    //            self.floatingWindow = nil // Release the reference after closing
+    //        }
+    //
+    //    }
+    
+    @objc func showFloatingWindow(value: String) {
+        if let existingWindow = floatingWindow {
+            existingWindow.orderOut(nil)
+            floatingWindow = nil
+        }
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 100, height: 60),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.level = .floating
+        window.collectionBehavior = [.transient, .ignoresCycle]
+        let contentView = NSHostingView(rootView:
+                                            Text(value)
+            .foregroundColor(.white)
+            .font(.system(size: 30, weight: .bold))
+            .frame(width: 100, height: 60)
+            .background(Color.black.opacity(0.8))
+            .cornerRadius(10)
+        )
         
-        floatingWindow?.isReleasedWhenClosed = true
-        floatingWindow?.isOpaque = false
-        var body: some View {
-            Text(value)
-                .foregroundColor(.white)  // Text color
-                .font(.system(size: 30))          // Font style
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black)
-                .cornerRadius(10)
-                .padding()
-                .multilineTextAlignment(.center)
+        window.contentView = contentView
+        window.center()
+        floatingWindow = window
+        window.orderFront(nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.floatingWindow?.orderOut(nil)
+            self?.floatingWindow = nil
         }
-        floatingWindow?.contentView = NSHostingView(rootView: body)
-        floatingWindow?.backgroundColor = NSColor.black
-        floatingWindow?.level = .floating
-        floatingWindow?.alphaValue = 0.8
-        floatingWindow?.center()
-        floatingWindow?.makeKeyAndOrderFront(nil)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.floatingWindow?.close()
-            self.floatingWindow = nil // Release the reference after closing
-        }
-        
     }
     
     fileprivate func configureSpaceMonitor() {
@@ -149,7 +159,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 } else {
                     print("Failed to update")
                 }
-               
+                
             }
             return
         }
@@ -158,13 +168,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let spaceID = (space as! NSDictionary)["ManagedSpaceID"] as! Int
             let spaceNumber = index + 1
             if spaceID == activeSpaceID {
-                DispatchQueue.main.async {
-                    guard let statusBarButton = self.statusBarItem?.button else{
-                        print("something is nil here")
-                        return
+                if spaceNumber != currentSpaceNumber {
+                    currentSpaceNumber = spaceNumber
+                    DispatchQueue.main.async {
+                        guard let statusBarButton = self.statusBarItem?.button else{
+                            print("something is nil here")
+                            return
+                        }
+                        statusBarButton.title = String("\(spaceNumber)")
+                        self.showFloatingWindow(value:String("\(spaceNumber)"))
                     }
-                    statusBarButton.title = String("\(spaceNumber)")
-                    self.showFloatingWindow(value:String("\(spaceNumber)"))
                 }
                 return
             }
@@ -180,12 +193,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSWorkspace.activeSpaceDidChangeNotification,
             object: workspace
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(AppDelegate.updateActiveSpaceNumber),
-            name: NSApplication.didUpdateNotification,
-            object: nil
-        )
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(AppDelegate.updateActiveSpaceNumber),
+//            name: NSApplication.didUpdateNotification,
+//            object: nil
+//        )
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
